@@ -152,6 +152,6 @@ gcloud run deploy aegisai \
 
 ## Repository & Source Control
 
-- **GitHub Repository:** [https://github.com/Varun-175/GeminiVault.git](https://github.com/Varun-175/GeminiVault.git)
+- **GitHub Repository:** [(https://github.com/Varun-175/AegisAI/)]
 - **Primary Branch:** `main`
 - **Security Policy:** `.gitignore` strictly protects `.env*`, API keys, service accounts, and local credentials.
