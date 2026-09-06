@@ -46,18 +46,29 @@ async function fetchAPI<T>(url: string, options: RequestInit = {}): Promise<T> {
     headers,
   });
 
+  const rawText = await response.text();
+
   if (!response.ok) {
     let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
     try {
-      const errJson = await response.json();
+      const errJson = JSON.parse(rawText);
       if (errJson.error) errorMsg = errJson.error;
     } catch {
-      // Ignore json parse error
+      if (rawText.trim().startsWith('<')) {
+        errorMsg = `HTTP ${response.status}: Service returned an HTML page instead of API response.`;
+      }
     }
     throw new Error(errorMsg);
   }
 
-  return response.json() as Promise<T>;
+  try {
+    return JSON.parse(rawText) as T;
+  } catch {
+    if (rawText.trim().startsWith('<')) {
+      throw new Error(`Server returned HTML instead of JSON. Ensure the endpoint exists and the service is healthy.`);
+    }
+    throw new Error(`Failed to parse server response: ${rawText.slice(0, 100)}`);
+  }
 }
 
 export const api = {

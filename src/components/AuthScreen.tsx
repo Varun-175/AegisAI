@@ -15,6 +15,7 @@ import {
   Fingerprint,
   Activity,
   Cpu,
+  Copy,
 } from 'lucide-react';
 import { api } from '../api.js';
 import { UserProfile } from '../types.js';
@@ -36,6 +37,20 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [showOAuthNotice, setShowOAuthNotice] = useState(false);
   const [oauthErrorDetails, setOauthErrorDetails] = useState<string | null>(null);
+  const [copiedDomains, setCopiedDomains] = useState(false);
+
+  const handleCopyDomains = () => {
+    const currentDomain = typeof window !== 'undefined' ? window.location.hostname : '';
+    const domains = [
+      'ais-dev-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app',
+      'ais-pre-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app',
+      currentDomain,
+    ].filter(Boolean);
+    const unique = Array.from(new Set(domains)).join('\n');
+    navigator.clipboard.writeText(unique);
+    setCopiedDomains(true);
+    setTimeout(() => setCopiedDomains(false), 3000);
+  };
 
   // Live Privacy Guardian Interactive Scanner Demo State on Landing
   const [demoText, setDemoText] = useState(
@@ -62,7 +77,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLoginSuccess }) => {
       }
     } catch (oauthErr: any) {
       console.warn('Firebase popup OAuth error:', oauthErr);
-      const msg = oauthErr?.message || 'Authentication flow encountered an error.';
+      let msg = oauthErr?.message || 'Authentication flow encountered an error.';
+      if (msg.includes('<!doctype') || msg.includes('Unexpected token')) {
+        msg = 'Firebase popup auth handler returned an HTML document. This occurs when Cloud Run domains are not yet registered in Firebase Authorized Domains.';
+      }
       setOauthErrorDetails(msg);
       setShowOAuthNotice(true);
     } finally {
@@ -329,34 +347,48 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLoginSuccess }) => {
                     </button>
                   </div>
 
-                  <div className="space-y-2.5 text-xs text-slate-300 leading-relaxed">
+                  <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
                     {oauthErrorDetails && (
-                      <div className="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl text-[11px] text-amber-200">
-                        <p className="font-semibold text-amber-300">Firebase Response:</p>
-                        <p className="mt-1 font-mono text-[10px] break-words text-slate-300 bg-black/30 p-1.5 rounded border border-white/[0.05]">
+                      <div className="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl text-[11px] text-amber-200 space-y-2">
+                        <p className="font-semibold text-amber-300">Firebase Error Reason:</p>
+                        <p className="font-mono text-[10px] break-words text-slate-300 bg-black/30 p-2 rounded border border-white/[0.05]">
                           {oauthErrorDetails}
                         </p>
-                        {oauthErrorDetails.includes('unauthorized-domain') && (
-                          <p className="mt-2 text-amber-200 leading-snug">
-                            <strong>Fix:</strong> In Firebase Console &gt; Authentication &gt; Settings &gt; Authorized Domains, ensure you have added both:
-                            <br />
-                            <code className="text-amber-300 font-mono text-[10px]">ais-dev-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app</code>
-                            <br />
-                            <code className="text-amber-300 font-mono text-[10px]">ais-pre-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app</code>
+
+                        <div className="pt-1 text-slate-300 space-y-1.5">
+                          <p className="font-semibold text-amber-300 text-xs">
+                            How to enable Google OAuth for this domain:
                           </p>
-                        )}
-                        {oauthErrorDetails.includes('popup-closed-by-user') && (
-                          <p className="mt-1.5 text-amber-200">
-                            The Google sign-in window was closed before completing authentication.
-                          </p>
-                        )}
+                          <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-300">
+                            <li>Go to <span className="text-white font-medium">Firebase Console &gt; Authentication &gt; Settings</span>.</li>
+                            <li>Scroll to <span className="text-white font-medium">Authorized Domains</span> and click <span className="text-teal-300 font-medium">Add domain</span>.</li>
+                            <li>Add the preview domain(s) below:</li>
+                          </ol>
+
+                          <div className="p-2 bg-black/40 rounded border border-white/[0.08] font-mono text-[10px] text-teal-300 space-y-0.5">
+                            <div>ais-dev-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app</div>
+                            <div>ais-pre-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app</div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleCopyDomains}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.15] text-slate-200 rounded-lg text-[11px] font-medium transition-colors"
+                          >
+                            <Copy className="w-3.5 h-3.5 text-teal-400" />
+                            {copiedDomains ? '✓ Domains Copied to Clipboard!' : 'Copy Domains to Clipboard'}
+                          </button>
+                        </div>
                       </div>
                     )}
 
-                    <div className="p-3 bg-[#131929] border border-white/[0.08] rounded-xl space-y-2">
-                      <p className="font-semibold text-white text-[11px]">Instant Access with Direct Account:</p>
-                      <p className="text-[11px] text-slate-400">
-                        You can also register and sign in directly using your email and password below with zero-trust cryptographic vault isolation.
+                    <div className="p-3.5 bg-[#131929] border border-teal-500/30 rounded-xl space-y-2">
+                      <p className="font-semibold text-teal-300 text-xs flex items-center gap-1.5">
+                        <Lock className="w-3.5 h-3.5 text-teal-400" />
+                        Instant Access (No Domain Whitelisting Required):
+                      </p>
+                      <p className="text-[11px] text-slate-300">
+                        You can sign in or create an account immediately using the form right below with zero-trust cryptographic vault isolation.
                       </p>
                       <div className="flex flex-wrap gap-2 pt-1">
                         <button
@@ -365,7 +397,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLoginSuccess }) => {
                             setAuthTab('register');
                             setShowOAuthNotice(false);
                           }}
-                          className="px-3 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 text-teal-300 rounded-lg text-[11px] font-semibold transition-colors"
+                          className="px-3.5 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/40 text-teal-300 rounded-lg text-[11px] font-semibold transition-colors"
                         >
                           Create Account Below
                         </button>
@@ -375,7 +407,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLoginSuccess }) => {
                             setAuthTab('signin');
                             setShowOAuthNotice(false);
                           }}
-                          className="px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-slate-300 rounded-lg text-[11px] font-semibold transition-colors"
+                          className="px-3.5 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-slate-200 rounded-lg text-[11px] font-semibold transition-colors"
                         >
                           Sign In with Password
                         </button>
@@ -388,7 +420,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onLoginSuccess }) => {
                     onClick={() => setShowOAuthNotice(false)}
                     className="w-full py-2.5 bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold text-xs rounded-xl transition-all shadow-md shadow-teal-500/20"
                   >
-                    Got it, Use Password Auth
+                    Close and Continue Below
                   </button>
                 </div>
               </div>

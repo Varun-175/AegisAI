@@ -150,8 +150,15 @@ gcloud run deploy aegisai \
 
 ---
 
+## Live Deployment & Access
+
+- **Public Preview / Shared App URL:** [https://ais-pre-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app](https://ais-pre-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app)
+- **Development App URL:** [https://ais-dev-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app](https://ais-dev-xs3hlr27k44lil737kpbpp-448521234429.asia-southeast1.run.app)
+
+---
+
 ## Repository & Source Control
 
-- **GitHub Repository:** [(https://github.com/Varun-175/AegisAI/)]
+- **GitHub Repository:** [https://github.com/Varun-175/AegisAI](https://github.com/Varun-175/AegisAI)
 - **Primary Branch:** `main`
 - **Security Policy:** `.gitignore` strictly protects `.env*`, API keys, service accounts, and local credentials.
