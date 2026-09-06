@@ -1,0 +1,15 @@
+node_modules
+dist
+build
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+*.log
+*.pem
+*.key
+credentials.json
+*service-account*.json
+*service_account*.json
+.DS_Store

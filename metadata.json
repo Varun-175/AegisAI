@@ -1,0 +1,6 @@
+{
+  "name": "AegisAI",
+  "description": "AegisAI — Personal AI Governance & Orchestration Plane. Your AI. Your Rules. Your Data.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

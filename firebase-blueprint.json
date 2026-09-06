@@ -1,0 +1,131 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile and authentication metadata",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "authProvider": { "type": "string" }
+      },
+      "required": ["uid", "email", "updatedAt"]
+    },
+    "Journal": {
+      "title": "Journal",
+      "description": "Private user journal entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string", "maxLength": 20000 },
+        "tags": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "content", "createdAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "Private conversational session with AegisAI",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "createdAt", "updatedAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Conversation message turn (user or model) with privacy metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "model", "system"] },
+        "content": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "role", "content", "timestamp"]
+    },
+    "Memory": {
+      "title": "Memory",
+      "description": "Governed AI memory with explicit purpose, duration, and status",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "content": { "type": "string" },
+        "purpose": { "type": "string" },
+        "sourceConversationId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "expirationPolicy": {
+          "type": "string",
+          "enum": ["1_day", "7_days", "30_days", "project", "forever"]
+        },
+        "expiresAt": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["approved", "candidate", "revoked", "expired"]
+        },
+        "lastUsedAt": { "type": "string" },
+        "useCount": { "type": "number" },
+        "revokedAt": { "type": "string" },
+        "revocationReason": { "type": "string" }
+      },
+      "required": ["id", "userId", "content", "purpose", "expirationPolicy", "status", "createdAt"]
+    },
+    "AuditEvent": {
+      "title": "AuditEvent",
+      "description": "Immutable security and privacy audit log record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "action": { "type": "string" },
+        "category": { "type": "string", "enum": ["auth", "privacy", "memory", "gemini", "system"] },
+        "severity": { "type": "string", "enum": ["info", "warn", "critical"] },
+        "details": { "type": "string" }
+      },
+      "required": ["id", "userId", "timestamp", "action", "category", "severity", "details"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/profile/main": {
+      "schema": "UserProfile",
+      "description": "User profile document"
+    },
+    "/users/{userId}/journals/{journalId}": {
+      "schema": "Journal",
+      "description": "User private journals"
+    },
+    "/users/{userId}/conversations/{conversationId}": {
+      "schema": "Conversation",
+      "description": "User multi-turn conversation sessions"
+    },
+    "/users/{userId}/conversations/{conversationId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "User messages within conversation"
+    },
+    "/users/{userId}/memories/{memoryId}": {
+      "schema": "Memory",
+      "description": "Governed user memories"
+    },
+    "/users/{userId}/memoryCandidates/{candidateId}": {
+      "schema": "Memory",
+      "description": "Extracted memory candidates pending user approval"
+    },
+    "/users/{userId}/auditEvents/{eventId}": {
+      "schema": "AuditEvent",
+      "description": "Immutable audit events"
+    }
+  }
+}
